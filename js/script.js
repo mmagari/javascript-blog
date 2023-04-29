@@ -9,6 +9,10 @@ for (let activeLink of activeLinks){
   activeLink.classList.remove('active');
 }
 /*add class 'active' to the clicked link*/
+const clickedElement = this;
+console.log('clickedElement:', clickedElement);
+clickedElement.classList.add('active');
+//console.log('clickedElement (withplus): ' +clickedElement);
 /*remove class 'active' fromm all articles*/
 const activeArticles = document.querySelectorAll('.posts article.active');
 for (let activeArticle of activeArticles){
