@@ -35,7 +35,8 @@ function titleClickHandler(event){
 const optArticleSelector = '.post',
   optTitleSelector = '.post-title',
   optTitleListSelector = '.titles',
-  optArticleTagsSelector = '.post-tags .list';
+  optArticleTagsSelector = '.post-tags .list',
+  optArticleAuthorSelector = '.post-author';
 
 function generateTitleLinks(customSelector = ''){
   /*remove contents of titleList */
@@ -45,7 +46,7 @@ function generateTitleLinks(customSelector = ''){
   }
   /* for each article*/
   const articles = document.querySelectorAll(optArticleSelector + customSelector);
-
+  console.log('Custom selector: ', articles);
   for (let article of articles){
   /* get the article id*/
     const articleId = article.getAttribute('id');
@@ -144,3 +145,25 @@ function addClickListenersToTags(){
 }
 
 addClickListenersToTags();
+
+function generateAuthors(){
+  /* find all post authors */
+  const articles = document.querySelectorAll(optArticleSelector);
+  /* START LOOP: for every author: */
+  for (let article of articles){
+    /* find tags authors */
+    const authorList = article.querySelector(optArticleAuthorSelector); 
+    /* make html variable with empty string */
+    let author = '';
+    /* get tags from data-author attribute */
+    const authorName = article.getAttribute('data-author');
+    console.log('author name: ', authorName);
+    /* add generated code to html variable*/
+    author = '<p><a href="#">'+ 'by ' + authorName + '</a></p>';
+    console.log('Author p:', author);
+    /* insert HTML for author name into paragraph */
+    authorList.insertAdjacentHTML('beforeend', author);
+  /* END LOOP: for every article */
+  }
+}
+generateAuthors();
