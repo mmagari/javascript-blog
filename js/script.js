@@ -34,7 +34,10 @@ const optArticleSelector = '.post',
   optTitleListSelector = '.titles',
   optArticleTagsSelector = '.post-tags .list',
   optArticleAuthorSelector = '.post-author',
-  optTagsListSelector = '.sidebar .tags';
+  optTagsListSelector = '.sidebar .tags',
+  optCloudClassCount ='5',
+  optCloudClassPrefix = 'tag-size-',
+  optAuthorsListSelector ='.sidebar .authors';
 
 function generateTitleLinks(customSelector = ''){
   /*remove contents of titleList */
@@ -65,9 +68,25 @@ function generateTitleLinks(customSelector = ''){
 
 generateTitleLinks();
 
+function calculateTagParms(tags){
+  const values = Object.values(tags);
+  const smallestNumber = Math.min(...values);
+  const biggestNumber = Math.max(...values);
+  return {smallestNumber, biggestNumber};
+}
+
+function calculateTagClass(count,params){
+  const normalizedCount = count - Math.min(...Object.values(params));
+  const normalizedMax = Math.max(...Object.values(params)) - Math.min(...Object.values(params));
+  const percentage = (normalizedCount / normalizedMax);
+  const classNumber = Math.floor( percentage * (optCloudClassCount -1) + 1);
+  const result = optCloudClassPrefix + classNumber;
+  return result;
+}
+
 function generateTags(){
-  /* [NEW] create a new variable allTags with an empty array */
-  let allTags = [];
+  /* [NEW] create a new variable allTags with an empty object */
+  let allTags = {};
   /* find all articles */
   const articles = document.querySelectorAll(optArticleSelector);
   /* START LOOP: for every article: */
@@ -75,7 +94,7 @@ function generateTags(){
     /* find tags wrapper */
     const tagsWrapperList = article.querySelector(optArticleTagsSelector);
     /* make html variable with empty string */
-    let tagsHTML, linkHTML = '';
+    let tagsHTML;
     /* get tags from data-tags attribute */
     const articleTags = article.getAttribute('data-tags');
     /* split into array */
@@ -84,13 +103,14 @@ function generateTags(){
     for (let tag of articleTagsArray){
     /* generate HTML of the link */
       tagsHTML = '<li><a href="#tag-' + tag + '">' + tag + ' ' + '</a></li>';
-      linkHTML = '<li><a href="#">' + tag + '</a><span>()</span></li> ';
       /* add generated code to html variable*/
       tagsWrapperList.insertAdjacentHTML('beforeend', ' ' + tagsHTML);
       /* [NEW] check if this link is NOT already in allTags */
-      if(allTags.indexOf(linkHTML) == -1){
+      if(!allTags.hasOwnProperty(tag)){
       /* [NEW] add generated code to allTags array */
-        allTags.push(linkHTML);
+        allTags[tag] = 1;
+      } else {
+        allTags[tag]++;
       }
       /* END LOOP: for each tag */
     }
@@ -98,11 +118,19 @@ function generateTags(){
   /* END LOOP: for every article */
   }
   /* [NEW] find list of tags in right column */
-  //console.log('Generate links: ', allTags);
+  const tagsParms = calculateTagParms(allTags);
   const tagList = document.querySelector(optTagsListSelector);
-  console.log (tagList);
-  /* [NEW] add html from allTags to tagList */
-  tagList.innerHTML = allTags.join(' ');
+  /* create variable for all links HTML code */
+  let allTagsHTML = '';
+  /* START LOOP: for each tag in allTags: */
+  for(let tag in allTags){
+    /*generate code of a link and add it to allTagsHTML */
+    const tagClass = calculateTagClass(allTags[tag],tagsParms);
+    allTagsHTML += '<li><a href="#" class="' + tagClass + '">' +tag + '</a></li>';
+  /*END LOOP: for each tag in allTags: */
+  }
+  /* add html from allTagsHTML to tagList */
+  tagList.innerHTML = allTagsHTML;
 }
 
 generateTags();
@@ -151,6 +179,8 @@ function addClickListenersToTags(){
 addClickListenersToTags();
 
 function generateAuthors(){
+  /* [NEW] create a new variable allTags with an empty object */
+  let allAuthors = {};
   /* find all post authors */
   const articles = document.querySelectorAll(optArticleSelector);
   /* START LOOP: for every author: */
@@ -166,13 +196,33 @@ function generateAuthors(){
     author = '<a href="#' + authorName +'">' + 'by ' + authorFullName + '</a>';
     /* insert HTML for author name into paragraph */
     authorList.insertAdjacentHTML('beforeend', author);
+    /*check if this author is NOT already in allAuthors */
+    if(!allAuthors.hasOwnProperty(authorName)){
+      /*add generated name to allAuthors object */
+      allAuthors[authorName] = 1;
+    } else {
+      allAuthors[authorName]++;
+    }
   /* END LOOP: for every article */
   }
+  /*find list of authors in right column */
+  const authorList = document.querySelector(optAuthorsListSelector);
+  /* create variable for all authors links HTML code */
+  let allAuthorSideList = '';
+  /* START LOOP: for each author in allAuthors */
+  for(let author in allAuthors){
+    /* generate code od a link and add it to allAuthorsSideList */
+    allAuthorSideList += '<li><a href="#"><span class="author-name">'+ author + '</a> (' + allAuthors[author] + ')</span></li>';
+  /* END LOOP: for each authors */
+  }
+  /* add html from authorSideList to authorList */
+  authorList.innerHTML = allAuthorSideList;
 }
 
 generateAuthors();
 
 function authorClickHandler(event){
+  
   /* prevent default action for this event */
   event.preventDefault();
   /* make new constant named "clickedElement" and give it the value of "this" */
